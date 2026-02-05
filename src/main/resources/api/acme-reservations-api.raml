@@ -1,0 +1,339 @@
+#%RAML 1.0
+annotationTypes:
+  amf-serverDescription:
+    type: any
+  amf-exclusiveMinimum:
+    type: any
+  amf-binding:
+    type: any
+  amf-pattern:
+    type: any
+  amf-payloads:
+    type: any
+  amf-exclusiveMaximum:
+    type: any
+  amf-consumes:
+    type: any
+  amf-additionalProperties:
+    type: any
+  amf-or:
+    type: any
+  amf-url:
+    type: any
+  amf-externalDocs:
+    type: any
+  amf-flow:
+    type: any
+  amf-oasDeprecated:
+    type: any
+  amf-contact:
+    type: any
+  amf-multipleOf:
+    type: any
+  amf-xor:
+    type: any
+  amf-not:
+    type: any
+  amf-callbacks:
+    type: any
+  amf-produces:
+    type: any
+  amf-format:
+    type: any
+  amf-license:
+    type: any
+  amf-summary:
+    type: any
+  amf-responses:
+    type: any
+  amf-maximum:
+    type: any
+  amf-tags:
+    type: any
+  amf-dependencies:
+    type: any
+  amf-readOnly:
+    type: any
+  sfdc:
+    type: any
+  amf-tuple:
+    type: any
+  amf-examples:
+    type: any
+  amf-collectionFormat:
+    type: any
+  amf-termsOfService:
+    type: any
+  amf-servers:
+    type: any
+  amf-xone:
+    type: any
+  amf-defaultResponse:
+    type: any
+  amf-baseUriParameters:
+    type: any
+  amf-parameters:
+    type: any
+  amf-minimum:
+    type: any
+  amf-recursive:
+    type: any
+  amf-and:
+    type: any
+title: ACME Reservations API
+description: |
+  This document represents **Experience API** for **ACME International** chain of hotels.
+  It will be used to process hotel room reservations, to check availability, and to apply loyalty benefits.
+version: v1
+/reservations:
+  post:
+    displayName: createReservation
+    description: Book a hotel room with specified preferences and apply loyalty upgrades if eligible.
+    (amf-summary): Create a new hotel reservation
+    body:
+      application/json:
+        (sfdc):
+          agent:
+            action:
+              isUserInput: true
+        type: object
+        example:
+          strict: false
+          value:
+            checkInDate: 2025-04-05
+            checkOutDate: 2025-04-07
+            roomType: Deluxe
+            specialRequests: none
+        additionalProperties: false
+        properties:
+          checkInDate:
+            description: Date of check-in.
+            type: date-only
+            required: true
+          checkOutDate:
+            description: Date of check-out.
+            type: date-only
+            required: true
+          roomType:
+            description: Preferred room type.
+            type: string
+            required: true
+          specialRequests?:
+            description: Additional requests like pillow type or air freshener choice.
+            type: string
+    responses:
+      "201":
+        description: Reservation successfully created
+        body:
+          application/json:
+            (sfdc):
+              agent:
+                action:
+                  isDisplayable: true
+              privacy:
+                isPii: true
+            type: object
+            example:
+              strict: false
+              value:
+                reservationId: QWERTY
+                upgradeApplied: false
+                totalPrice: 499.98
+            additionalProperties: false
+            properties:
+              reservationId?:
+                description: Unique Id of the created reservation.
+                type: string
+              upgradeApplied?:
+                description: Indicates if a loyalty-based upgrade was applied.
+                type: boolean
+              totalPrice?:
+                description: Final price after applying any discounts or upgrades.
+                type: number
+                format: float
+    (sfdc):
+      agent:
+        action:
+          publishAsAgentAction: true
+/reservations/{reservationId}:
+  get:
+    displayName: getReservation
+    description: Get details of a specific reservation by Id.
+    (amf-summary): Retrieve reservation details
+    responses:
+      "200":
+        description: Reservation details retrieved successfully
+        body:
+          application/json:
+            (sfdc):
+              agent:
+                action:
+                  isDisplayable: true
+              privacy:
+                isPii: true
+            type: object
+            example:
+              strict: false
+              value:
+                reservationId: QWERTY
+                customerId: FYIXYZPDQFWIWBRB
+                roomType: Deluxe
+                checkInDate: 2025-04-05
+                checkOutDate: 2025-04-07
+                upgradeApplied: false
+            additionalProperties: false
+            properties:
+              reservationId?:
+                description: Unique Id of the created reservation.
+                type: string
+              customerId?:
+                description: Unique Id of the customer.
+                type: string
+              roomType?:
+                description: Preferred room type.
+                type: string
+              checkInDate?:
+                description: Date of check-in.
+                type: date-only
+              checkOutDate?:
+                description: Date of check-out.
+                type: date-only
+              upgradeApplied?:
+                description: Indicates if a loyalty-based upgrade was applied.
+                type: boolean
+    (sfdc):
+      agent:
+        action:
+          publishAsAgentAction: true
+  uriParameters:
+    reservationId:
+      description: Represents unique reservation Id
+      required: true
+      example:
+        strict: false
+        value: QWERTY
+      type: string
+/reservations/price:
+  get:
+    displayName: getReservationPrice
+    description: Calculates the price of a requested hotel stay based on the length of stay, the check in date, and preferred room type.
+    (amf-summary): Calculates the price of the hotel stay
+    queryParameters:
+      checkInDate:
+        description: Check in date for the reservation
+        required: true
+        example:
+          strict: false
+          value: 2025-04-05
+        type: date-only
+      checkOutDate:
+        description: Check out date for the reservation
+        required: true
+        example:
+          strict: false
+          value: 2025-04-07
+        type: date-only
+      roomType:
+        description: Room type
+        required: true
+        enum:
+          - Standard
+          - Deluxe
+          - Suite
+        example:
+          strict: false
+          value: Deluxe
+        type: string
+    responses:
+      "200":
+        description: Reservation price successfully retrieved
+        body:
+          application/json:
+            (sfdc):
+              agent:
+                action:
+                  isDisplayable: true
+              privacy:
+                isPii: true
+            type: object
+            example:
+              strict: false
+              value:
+                totalPrice: 499.98
+            additionalProperties: false
+            properties:
+              totalPrice?:
+                description: Final price after applying any discounts or upgrades.
+                type: number
+                format: float
+    (sfdc):
+      agent:
+        action:
+          publishAsAgentAction: true
+/customers/{customerId}:
+  get:
+    displayName: getCustomer
+    description: Returns the customer name, email, and address details.
+    (amf-summary): Retrieves customer details.
+    responses:
+      "200":
+        description: Reservation price successfully retrieved
+        body:
+          application/json:
+            type: object
+            example:
+              strict: false
+              value:
+                customerId: FYIXYZPDQFWIWBRB
+                firstName: Geertruida
+                lastName: Izarra
+                email: mendraca306@hotbrev.com
+                address: 7494 WHITE SHADOWS DR
+                city: Gonesse
+                country: Netherlands
+                postalCode: "12121"
+            additionalProperties: false
+            properties:
+              customerId?:
+                description: Unique Id of the customer
+                type: string
+              firstName?:
+                description: First name of the customer
+                type: string
+              lastName?:
+                description: Last name of the customer
+                type: string
+              email?:
+                description: Email address of the customer
+                type: string
+              address?:
+                description: Street address
+                type: string
+              city?:
+                description: City
+                type: string
+              country?:
+                description: Country
+                type: string
+              postalCode?:
+                description: Postal Code
+                type: string
+  uriParameters:
+    customerId:
+      description: Customer Id
+      example:
+        strict: false
+        value: FYIXYZPDQFWIWBRB
+      type: string
+(sfdc):
+  agent:
+    topic:
+      name: ACME Reservations API
+      classificationDescription: This API allows agents to manage hotel reservations, and apply loyalty upgrades.
+      scope: Your job is to assist customers in booking hotel rooms based on their preferences, loyalty status, and availability. You should also be able to recommend upgrades if the customer qualifies.
+      instructions:
+        - The available room types are Standard, Deluxe or Suite.
+        - If the customer is requesting details around their reservation, you must always ask for a Reservation Id. Then, execute the 'getReservation' action to retrieve details of their reservation.
+        - If the customer asks to create a reservation or reserve a hotel room, you must first calculate the price of the hotel stay based on the check in date, checkout date and room type. Use the 'getReservationPrice' action to calculate the total price and ask the customer to confirm if the price is okay.
+        - If the customer is okay with the total price, ask if they have any special requests. Then, use the desired check-in date, check out date, and room type to create the reservation with the 'createReservation' action.
+        - If a date is provided, convert the date to YYYY-MM-DD format and ensure that the date is not in the past before using it for the 'getReservationPrice' or the 'reservationCreate' actions. If a past date is provided, explain to the client the date must be in future.
